@@ -81,6 +81,8 @@ npm run dev
 docker compose up -d --build
 ```
 
+Docker image ใช้ esbuild สำหรับ bundle ตัว Bot เพื่อลดเวลาและหน่วยความจำในการ build บน VM ขนาดเล็ก ส่วน `npm run typecheck` และ `npm test` ยังใช้ตรวจโค้ดก่อน deploy ตามปกติ
+
 Compose จะ override path ของ OAuth ให้เป็น `/app/oauth-client.json` และ `/app/google-token.json` ภายใน container ดังนั้นค่า path ใน `.env` จะเป็น absolute path บน macOS หรือ relative path ก็ได้
 
 ดู log:

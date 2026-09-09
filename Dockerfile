@@ -7,7 +7,7 @@ RUN npm ci
 
 COPY tsconfig.json ./
 COPY src ./src
-RUN npm run build && npm prune --omit=dev
+RUN npm run build:docker && npm prune --omit=dev
 
 FROM node:24-bookworm-slim AS runtime
 
@@ -20,4 +20,4 @@ COPY --from=build --chown=node:node /app/dist ./dist
 
 USER node
 
-CMD ["node", "dist/src/index.js"]
+CMD ["node", "dist/index.js"]
