@@ -1,0 +1,10 @@
+.git
+.env
+node_modules
+dist
+npm-debug.log*
+service-account.json
+oauth-client.json
+google-token.json
+README.md
+test
