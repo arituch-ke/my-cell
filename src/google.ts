@@ -2,6 +2,7 @@ import { Readable } from "node:stream";
 import { google, sheets_v4 } from "googleapis";
 import type { Config } from "./config.js";
 import { createGoogleAuth } from "./google-auth.js";
+import { nextPlateNumbers } from "./message-parser.js";
 
 export interface ImageInput {
   bytes: Buffer;
@@ -11,7 +12,6 @@ export interface ImageInput {
 
 export interface SheetRecord {
   date: Date;
-  labels: [string, string, string];
   hasSub: boolean;
   remark: string | null;
   images: [ImageInput, ImageInput, ImageInput];
@@ -36,6 +36,7 @@ export class GoogleSheetStore {
     if (existingRow !== null) return existingRow;
 
     const row = await this.findNextRow();
+    const plateNumbers = await this.getPlateNumbers(row, record.hasSub);
     const uploadedIds: string[] = [];
 
     try {
@@ -57,7 +58,7 @@ export class GoogleSheetStore {
               range: `${quoteSheet(this.config.GOOGLE_SHEET_NAME)}!A${row}:G${row}`,
               values: [[
                 dateFormula,
-                ...record.labels,
+                ...plateNumbers,
                 record.hasSub ? "Sub" : "",
                 record.remark ?? "",
                 record.discordMessageId
@@ -98,6 +99,17 @@ export class GoogleSheetStore {
     let row = this.config.START_ROW;
     while (values[row - this.config.START_ROW]?.[0]) row += 2;
     return row;
+  }
+
+  private async getPlateNumbers(row: number, hasSub: boolean) {
+    if (row === this.config.START_ROW) return nextPlateNumbers([], hasSub);
+
+    const previousRow = row - 2;
+    const response = await this.sheets.spreadsheets.values.get({
+      spreadsheetId: this.config.GOOGLE_SPREADSHEET_ID,
+      range: `${quoteSheet(this.config.GOOGLE_SHEET_NAME)}!B${previousRow}:D${previousRow}`
+    });
+    return nextPlateNumbers(response.data.values?.[0] ?? [], hasSub);
   }
 
   private async uploadImage(image: ImageInput): Promise<string> {

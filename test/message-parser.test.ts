@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { parseMessage, plateLabels } from "../src/message-parser.js";
+import { nextPlateNumbers, parseMessage } from "../src/message-parser.js";
 
 describe("parseMessage", () => {
   it("parses Sub and Remark from the screenshot format", () => {
@@ -20,12 +20,20 @@ describe("parseMessage", () => {
   });
 });
 
-describe("plateLabels", () => {
-  it("uses P29-P31 by default", () => {
-    assert.deepEqual(plateLabels(false), ["P29", "P30", "P31"]);
+describe("nextPlateNumbers", () => {
+  it("uses 29-31 for the first regular record", () => {
+    assert.deepEqual(nextPlateNumbers([], false), [29, 30, 31]);
   });
 
-  it("increments all labels when Sub is present", () => {
-    assert.deepEqual(plateLabels(true), ["P30", "P31", "P32"]);
+  it("increments the previous values when Sub is present", () => {
+    assert.deepEqual(nextPlateNumbers([30, 31, 32], true), [31, 32, 33]);
+  });
+
+  it("keeps the previous values when Sub is absent", () => {
+    assert.deepEqual(nextPlateNumbers([30, 31, 32], false), [30, 31, 32]);
+  });
+
+  it("migrates legacy P-prefixed values", () => {
+    assert.deepEqual(nextPlateNumbers(["P29", "P30", "P31"], true), [30, 31, 32]);
   });
 });

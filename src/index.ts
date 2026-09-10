@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 import { loadConfig } from "./config.js";
 import { GoogleSheetStore, type ImageInput } from "./google.js";
-import { parseMessage, plateLabels } from "./message-parser.js";
+import { parseMessage } from "./message-parser.js";
 
 const config = loadConfig();
 const store = await GoogleSheetStore.create(config);
@@ -84,7 +84,6 @@ async function processMessage(
     const images = await Promise.all(attachments.map(downloadImage)) as [ImageInput, ImageInput, ImageInput];
     const row = await store.append({
       date: message.createdAt,
-      labels: plateLabels(metadata.hasSub),
       hasSub: metadata.hasSub,
       remark: metadata.remark,
       images,

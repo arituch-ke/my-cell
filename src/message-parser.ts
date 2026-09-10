@@ -11,7 +11,20 @@ export function parseMessage(content: string): MessageMetadata {
   return { hasSub, remark };
 }
 
-export function plateLabels(hasSub: boolean): [string, string, string] {
-  const first = hasSub ? 30 : 29;
-  return [`P${first}`, `P${first + 1}`, `P${first + 2}`];
+export type PlateNumbers = [number, number, number];
+
+export function nextPlateNumbers(
+  previousValues: unknown[],
+  hasSub: boolean
+): PlateNumbers {
+  const parsed = previousValues.map((value) =>
+    Number(String(value).trim().replace(/^P/i, ""))
+  );
+  const previous: PlateNumbers = parsed.length === 3 && parsed.every(Number.isFinite)
+    ? parsed as PlateNumbers
+    : [29, 30, 31];
+
+  return hasSub
+    ? previous.map((value) => value + 1) as PlateNumbers
+    : previous;
 }
